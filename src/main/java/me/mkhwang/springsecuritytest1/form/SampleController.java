@@ -1,4 +1,4 @@
-package me.mkhwang.springsecuritytest1.from;
+package me.mkhwang.springsecuritytest1.form;
 
 import me.mkhwang.springsecuritytest1.account.AccountContext;
 import me.mkhwang.springsecuritytest1.account.AccountRepository;

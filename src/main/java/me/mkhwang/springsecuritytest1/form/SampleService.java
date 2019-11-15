@@ -1,15 +1,9 @@
-package me.mkhwang.springsecuritytest1.from;
+package me.mkhwang.springsecuritytest1.form;
 
-import me.mkhwang.springsecuritytest1.account.Account;
-import me.mkhwang.springsecuritytest1.account.AccountContext;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
-import java.security.Principal;
-import java.util.Collection;
 
 @Service
 public class SampleService {
