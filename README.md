@@ -230,6 +230,12 @@ FilterChainProxy getFilters
 
 ## AccessDecisionManager 1부
 
+리소스에 접근하려고할때 그것을 허용할 것인가 그 것이 유효한 요청인가를 판단하는.
+
+인가 할때는AccessDecisionManager
+
+인증 할때는 AuthenticationManager
+
 ##### Access Control 결정을 내리는 인터페이스로, 구현체 3가지를 기본으로 제공한다.
 
 - **AffirmativeBased**: 여러 Voter중에 한명이라도 허용하면 허용. 기본 전략.
@@ -241,3 +247,104 @@ FilterChainProxy getFilters
 - 해당 Authentication이 특정한 Object에 접근할 때 필요한 ConfigAttributes를 만족하는지 확인한다.
 - **WebExpressionVoter**: 웹 시큐리티에서 사용하는 기본 구현체, ROLE_Xxxx가 매치하는지 확인.
 - RoleHierarchyVoter: 계층형 ROLE 지원. ADMIN > MANAGER > USER...
+
+## AccessDecisionManager 2부
+
+AccessDicisionManager 또는 Voter를 커스터마이징 하는 방법
+
+RoleHierarchy를 이용하여 admin은 user권한도 함께 가질 수 있도록 구현
+
+```java
+public SecurityExpressionHandler expressionHandler() {
+    RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+    roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER");
+
+    DefaultWebSecurityExpressionHandler handler = new DefaultWebSecurityExpressionHandler();
+    handler.setRoleHierarchy(roleHierarchy);
+
+    return handler;
+}
+
+@Override
+public void configure(HttpSecurity http) throws Exception {
+    http
+      .antMatcher("/**")
+      .authorizeRequests()
+      .mvcMatchers("/","/info","/account/**").permitAll()
+      .mvcMatchers("/admin").hasRole("ADMIN")
+      .mvcMatchers("/user").hasRole("USER")
+      .anyRequest().authenticated()
+      .expressionHandler(expressionHandler());
+    http.formLogin();
+    http.httpBasic();
+}
+```
+
+
+
+## FilterSecurityInterceptor
+
+AccessDicisionManager를 사용하며 Access Control또는 예외 처리 하는 필터.
+
+대부분의 경우 FilterChainProxy에 제일 마지막 필터로 들어있다.
+
+![](./src/main/resources/static/img/chapter14.png)
+
+
+
+종합
+
+SecurityContextHolder가 Authentication을 가지고 있고,
+
+Authentication은 AuthenticationManager를 통해 인증하고, 결과로 나온 Authentication을 다시 SecurityContextHolder에 넣어 주는 역할 - UsernamePasswordAuthenticationFilter, SecurityContextPersistenceFilter
+
+이러한 필터들은 FilterChainProxy에 의해 순차적으로 실행해주고
+
+FilterChainProxy도 DelegatingFilterProxy를 통해서 요청을 전달받은거고, DelegatingFilterProxy는 스프링 부트를 사용할 때는 자동으로 등록 됨. SecurityFilterAutoConfiguration
+
+부트를 쓰지 않을 때에는 AbstractSecurityWebApplicationInitializer를 상속받아서 쓰면 된다.
+
+인가 - AccessDecisionManager 내부적으로는 AccessDicisionVoter를 여러개 쓰고있고,
+
+AccessDecisionManager는 FilterSecurityInterceptor가 사용하는데 FilterChainProxy의 필터중 하나.
+
+
+
+## ExceptionTranslationFilter
+
+필터 체인에서 발생하는 AccessDeniedException과 AuthenticationException을 처리하는 필터(예외 처리기)
+
+##### AuthenticationException 발생 시 - 인증 예외
+
+- AuthenticationEntryPoint 실행 - 인증처리기
+
+- AbstractSecurityInterceptor 하위 클래스(예, FilterSecurityInterceptor)에서 발생하는 예외만 처리.
+
+- 그렇다면 UsernamePasswordAuthenticationFilter에서 발생한 인증 에러는?
+
+  ExceptionTranslationFilter가 처리하지 않는다. UsernamePasswordAuthenticationFilter에서 처리
+
+  
+
+##### AccessDeniedException 발생 시
+
+- 익명 사용자라면 AuthenticationEntryPoint 실행
+- 익명 사용자가 아니면 AccessDeniedHandler에게 위임
+
+
+
+## SpringSecurity 아키텍쳐 정리
+
+```java
+* The {@link WebSecurity} is created by {@link WebSecurityConfiguration} to create the
+* {@link FilterChainProxy} known as the Spring Security Filter Chain
+* (springSecurityFilterChain). The springSecurityFilterChain is the {@link Filter} that
+* the {@link DelegatingFilterProxy} delegates to.
+```
+
+![](./src/main/resources/static/img/chapter20.png)
+
+
+
+
+
