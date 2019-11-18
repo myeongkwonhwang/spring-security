@@ -1,5 +1,7 @@
 package me.mkhwang.springsecuritytest1.form;
 
+import me.mkhwang.springsecuritytest1.common.SecurityLogger;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,5 +25,11 @@ public class SampleService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         System.out.println("====================");
         System.out.println(userDetails.getUsername());
+    }
+
+    //@Async
+    public void ayncService() {
+        SecurityLogger.log("Async Service");
+        System.out.println("Async service is called");
     }
 }
