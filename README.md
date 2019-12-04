@@ -436,6 +436,50 @@ X-XSS-Protection: 1; mode=block
 
 - X-Content-Type-Options:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
 - Cache-Control:https://www.owasp.org/index.php/Testing_for_Browser_cache_weakness_(OTG-AUTHN-006)
-- X-XSS-Protectionhttps://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protectionhttps://github.com/naver/lucy-xss-filter
-- HSTShttps://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
+- X-XSS-Protection:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protectionhttps://github.com/naver/lucy-xss-filter
+- HSTS:https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Strict_Transport_Security_Cheat_Sheet.html
 - X-Frame-Options
+
+
+
+## CSRF 어택 방지 필터: CsrfFilterCSRF 
+
+어택 방지 필터 
+
+원치않는 요청을 만들어서 보내는 것
+
+- 인증된 유저의 계정을 사용해 악의적인 변경 요청을 만들어 보내는 기법.
+- https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)
+- https://namu.wiki/w/CSRF
+- CORS를 사용할 때 특히 주의 해야 함.
+  - 타 도메인에서 보내오는 요청을 허용하기 때문에...
+  - https://en.wikipedia.org/wiki/Cross-origin_resource_sharing
+
+요청시 CsrfFilter에서 form으로 input hidden으로 토큰 값을 보냄 로그인페이지로
+
+로그인시 전송된 토큰과 비교하여 정상요청인지 확인.
+
+
+
+## CSRF 토큰 사용 예제
+
+JSP에서 스프링 MVC가 제공하는 <form:form> 태그 또는 타임리프 2.1+ 버전을 사용할 때 폼에 CRSF 히든 필드가 기본으로 생성 됨.
+
+
+
+## 로그아웃 처리 필터: LogoutFilter
+
+여러 LogoutHandler를 사용하여 로그아웃시 필요한 처리를 하며 이후에는 LogoutSuccessHandler를 사용하여 로그아웃 후처리를 한다.
+
+LogoutHandler
+
+- CsrfLogoutHandler
+- SecurityContextLogoutHandler
+
+LogoutSuccessHandler
+
+- SimplUrlLogoutSuccessHandler
+
+로그아웃 필터 설정
+
+![img](https://lh4.googleusercontent.com/15J8KcBSBMPmmRPbl1U_mtawjNOZXiuDqNWzqckBjj6FUp8_mdV0WDYbTSvwNyfSGVdkOSgduOlwjL3w_rGy1bcBT8Qty1aeBTWDuK3G-3qeLGplHNZFHGd2e9Xi8xN2Aj5L582p)
